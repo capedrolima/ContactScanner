@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="theme-color" content="#6a0dad" />
+  <title>Booth Contact Scanner</title>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="appbar">
+    <h1>Contact Scanner</h1>
+    <span id="count" class="count">0 saved</span>
+  </header>
+
+  <!-- CAMERA / CAPTURE VIEW -->
+  <section id="scanView" class="view">
+    <div class="cols">
+      <div class="col-main">
+        <div class="camera-wrap">
+          <video id="video" playsinline muted></video>
+          <div class="reticle"></div>
+          <div id="status" class="status">Tap “Start camera” to begin</div>
+        </div>
+      </div>
+      <div class="col-side">
+        <div class="controls">
+          <button id="startBtn" class="btn primary">Start camera</button>
+          <button id="captureBtn" class="btn" disabled>Capture badge</button>
+        </div>
+        <p class="hint">
+          Point the camera so the whole badge is in frame. The barcode is detected
+          automatically; tap <b>Capture badge</b> to read the name, title &amp; company.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- REVIEW / EDIT VIEW -->
+  <section id="reviewView" class="view hidden">
+    <div class="cols">
+      <div class="col-main">
+        <img id="snapshot" class="snapshot" alt="captured badge" />
+        <div class="ocr-chips-wrap">
+          <p class="hint">Tap a detected line, then a field to assign it:</p>
+          <div id="ocrChips" class="ocr-chips"></div>
+        </div>
+      </div>
+      <div class="col-side">
+        <h2>Review contact</h2>
+        <label>Name <input id="f_name" type="text" autocomplete="off" /></label>
+        <label>Job title <input id="f_title" type="text" autocomplete="off" /></label>
+        <label>Company <input id="f_company" type="text" autocomplete="off" /></label>
+        <label>Barcode # <input id="f_barcode" type="text" autocomplete="off" /></label>
+        <div class="controls">
+          <button id="saveBtn" class="btn primary">Save &amp; scan next</button>
+          <button id="discardBtn" class="btn ghost">Discard</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SAVED LIST VIEW -->
+  <section id="listView" class="view hidden">
+    <h2>Saved contacts (<span id="listCount">0</span>)</h2>
+    <div id="list" class="list"></div>
+  </section>
+
+  <nav class="tabbar">
+    <button data-view="scanView" class="tab active">📷 Camera</button>
+    <button data-view="listView" class="tab">📋 List</button>
+    <button id="exportBtn" class="tab">⬇️ Export</button>
+  </nav>
+
+  <canvas id="canvas" hidden></canvas>
+
+  <!-- Full-screen image viewer (tap thumbnail to open; long-press to save) -->
+  <div id="imgModal" class="modal hidden">
+    <img id="modalImg" alt="badge photo" />
+    <button id="modalClose" class="modal-close" aria-label="Close">✕</button>
+  </div>
+
+  <script src="https://unpkg.com/@zxing/library@0.21.3/umd/index.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
