@@ -41,8 +41,17 @@
   let lastImage = '';   // downscaled JPEG of the most recent capture
   let selectedChip = null;
 
-  // Lines we never want to treat as name/title/company (badge boilerplate).
-  const NOISE = /(^(government|service|delivery|exhibitor|attendee|visitor|delegate|sponsor|partner)$)|event partner|event location|convention center|^\d|place nw|washington, dc/i;
+  // Words/phrases to ALWAYS ignore on the badge (header boilerplate). A line is
+  // dropped entirely only when it consists of NOTHING BUT these words — so the
+  // header ("GOVERNMENT SERVICE DELIVERY") and "Event Partner" are removed, but
+  // a real company that merely contains one of them is left intact.
+  const ALWAYS_IGNORE = /\b(governa?ment|service|delivery|event\s*partner|partner)\b/gi;
+  function isBoilerplate(line) {
+    return line.replace(ALWAYS_IGNORE, ' ').replace(/[^A-Za-z]/g, '').length === 0;
+  }
+
+  // Other lines to skip as name/title/company (venue/address info).
+  const NOISE = /event location|convention center|place nw|washington,?\s*dc/i;
 
   // ---- View switching ----------------------------------------------------
   function show(viewName) {
@@ -201,11 +210,14 @@
     fields.title.value = '';
     fields.company.value = '';
 
-    // Candidate lines = OCR lines minus obvious noise and code-like tokens.
+    // Drop lines that are nothing but the always-ignore header words first.
+    const usable = lines.filter((l) => !isBoilerplate(l));
+
+    // Candidate lines = usable lines minus venue noise and code-like tokens.
     // NOTE: only drop alphanumeric tokens that CONTAIN A DIGIT (e.g. the
     // barcode "LI300178"). All-caps words like "PEDRO LIMA" or "WORK DYNAMICS"
     // must be KEPT — they are exactly what we want.
-    const candidates = lines.filter((l) => {
+    const candidates = usable.filter((l) => {
       const compact = l.replace(/\s/g, '');
       if (NOISE.test(l)) return false;
       if (l === barcode) return false;
@@ -219,7 +231,8 @@
     if (candidates[1]) fields.title.value = titleCase(candidates[1]);
     if (candidates[2]) fields.company.value = titleCase(candidates[2]);
 
-    renderChips(lines);
+    // Chips also exclude the always-ignore words so they can't be re-added.
+    renderChips(usable);
   }
 
   // Tap a chip to select an OCR line, then tap a field to assign it.

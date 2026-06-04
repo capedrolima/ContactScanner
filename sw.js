@@ -1,6 +1,6 @@
 /* Minimal service worker: cache the app shell so it loads instantly and
    keeps working if the connection drops. CDN/OCR assets are cached on first use. */
-const CACHE = 'contact-scanner-v4';
+const CACHE = 'contact-scanner-v5';
 const SHELL = [
   './',
   './index.html',
